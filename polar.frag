@@ -20,7 +20,7 @@ void main(){
 
     float f = cos(a*3.);
      //f = abs(cos(a*3.+u_time));
-     float h = abs(cos(a*2.5))*.5+.3;
+     float h = abs(cos(a*2.5+u_time/2.0))*.5+.3;
      float g = abs(cos(a*12.)*sin(a*3.+u_time))*.8+.1;
      f = smoothstep(-.5,1., cos(a*10.+u_time))*0.2+0.5;
 
