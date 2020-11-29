@@ -5,6 +5,7 @@ precision mediump float;
 uniform vec2 u_mouse;
 uniform vec2 u_resolution;
 uniform float u_time;
+uniform sampler1D tex;
 
 //uniform sampler2D u_tex0;
 //uniform vec2 u_tex0Resolution;
@@ -15,10 +16,11 @@ vec3 hsb2rgb( in vec3 c );
 void main (void) {
     // map space to (+x,-x) = (-2.5,1), (+y,-y)=(-1,1)
     vec2 st = gl_FragCoord.xy/u_resolution.xy; 
-    st = (st*vec2(3.5,2.0) + vec2(-2.5, -2.0));
-    st /= u_time;
-    st += vec2(-0.75, 0.0);
-    st -= vec2(0.0,2.5/u_time);//*u_time;
+    st = (st*vec2(3.5,2.0) + vec2(-2.5, -1.0));
+    //st = (st*vec2(3.5,2.0) + vec2(-2.5, -2.0));
+    //st /= u_time;
+    //st += vec2(-0.75, 0.0);
+    //st -= vec2(0.0,2.5/u_time);/[>u_time;
 
     //st -= vec2(0.4, 0.0)/u_time;
     vec3 color = vec3(0.0);
@@ -35,11 +37,12 @@ void main (void) {
     //color.s = 1.0;
 
     gl_FragColor = vec4(color,1.0);
+    //gl_FragColor = texture1D(tex, m);
 }
 
 // return normalised number of iterations 
 float mandelbrot(vec2 posn) {
-    int maxIterations = 1000;
+    int maxIterations = 100;
     float f_thresh = 2.0;
 
     vec2 z = vec2(0.0);
