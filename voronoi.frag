@@ -27,6 +27,7 @@ void main() {
 
     // find the distance to the 8 other points in adjacent cells
     float minDist = 1.0;
+    vec2 minPoint = vec2(0.0);
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             // get the tile of interest
@@ -38,10 +39,16 @@ void main() {
             vec2 diff = neighbour + neighbourPt - f_st;
             float dist = length(diff);
             // find minimum distance
-            minDist = min(minDist, dist);
+            if (dist < minDist) {
+                minDist = dist;
+                minPoint = neighbourPt;
+            }
+            //minDist = min(minDist, dist);
         }
     }
 
     color += minDist;
+    color.rg = minPoint;
+
     gl_FragColor = vec4(color, 1.0);
 }
