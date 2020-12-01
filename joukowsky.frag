@@ -49,6 +49,24 @@ vec2 inverseJoukowsky(vec2 st, float c) {
     return zeta;
 }
 
+// complex number operations
+vec2 cadd( vec2 a, float s ) { return vec2( a.x+s, a.y ); }
+vec2 cmul( vec2 a, vec2 b )  { return vec2( a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x ); }
+vec2 cdiv( vec2 a, vec2 b )  { float d = dot(b,b); return vec2( dot(a,b), a.y*b.x - a.x*b.y ) / d; }
+vec2 csqrt( vec2 z ) { float m = length(z); return sqrt( 0.5*vec2(m+z.x, m-z.x) ) * vec2( 1.0, sign(z.y) ); }
+vec2 conj( vec2 z ) { return vec2(z.x,-z.y); }
+vec2 cpow( vec2 z, float n ) { float r = length( z ); float a = atan( z.y, z.x ); return pow( r, n )*vec2( cos(a*n), sin(a*n) ); }
+
+// 3rd attempt
+vec2 inverseJoukowsky3(vec2 st, float c) {
+    vec2 phi = csqrt(cadd(cpow(st, 2.0), -pow(c,2.0)));
+    if (st.x >= 0.0) {
+        st = st + phi;
+    } else {
+        st = st - phi;
+    }
+    return st;
+}
 
 vec2 inverseJoukowsky2(vec2 st, float c) {
     float x = st.x;
@@ -90,11 +108,11 @@ void main() {
     st *= width;
     st -= width/2.0;
     st += vec2(xtrans,0.0);
-    vec2 centre = vec2(-0.08, 0.08);
+    vec2 centre = vec2(-0.08+sin(u_time/5.0)/4.0, 0.08);
     //float stripe = 0.2*abs(sin(st.x*10.0+u_time));
     //st = inverseJoukowsky(st, 1.5*sin(u_time/2.0)+4.0);
     //st = inverseJoukowsky(st, sin(u_time/10.0)*0.2+1.0);
-    st = inverseJoukowsky(st, smoothstep(0.1, 0.9, u_time/10.0));
+    st = inverseJoukowsky3(st, smoothstep(0.1, 0.9, 2.0*sin(u_time)));
     
     //st = joukowsky(st);
 
