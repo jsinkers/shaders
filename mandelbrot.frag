@@ -1,5 +1,5 @@
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
 #endif
 
 uniform vec2 u_mouse;
@@ -10,9 +10,21 @@ uniform sampler1D tex;
 //uniform sampler2D u_tex0;
 //uniform vec2 u_tex0Resolution;
 
-float mandelbrot(vec2 posn);
-vec3 hsb2rgb( in vec3 c );
 
+// complex number operations
+vec2 cadd( vec2 a, float s ) { return vec2( a.x+s, a.y ); }
+vec2 cmul( vec2 a, vec2 b )  { return vec2( a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x ); }
+vec2 cdiv( vec2 a, vec2 b )  { float d = dot(b,b); return vec2( dot(a,b), a.y*b.x - a.x*b.y ) / d; }
+vec2 csqrt( vec2 z ) { float m = length(z); return sqrt( 0.5*vec2(m+z.x, m-z.x) ) * vec2( 1.0, sign(z.y) ); }
+vec2 cconj( vec2 z ) { return vec2(z.x,-z.y); }
+vec2 cpow( vec2 z, float n ) { 
+    float r = length( z );
+    float a = atan( z.y, z.x );
+    return pow( r, n )*vec2( cos(a*n), sin(a*n) );
+}
+
+float mandelbrot(vec2 posn, float power);
+vec3 hsb2rgb( in vec3 c );
 void main (void) {
     // map space to (+x,-x) = (-2.5,1), (+y,-y)=(-1,1)
     vec2 st = gl_FragCoord.xy/u_resolution.xy; 
@@ -24,11 +36,13 @@ void main (void) {
 
     //st -= vec2(0.4, 0.0)/u_time;
     vec3 color = vec3(0.0);
-    float m = mandelbrot(st);
+    float power = 0.0;
+    power = 4.0+2.0*sin(u_time/10.0);
+    float m = mandelbrot(st, power);
     //color = vec3(0.0,0.0,-log(m));
-    vec3 color1 = vec3(0.0, 0.0, 1.0);
-    vec3 color2 = vec3(1.0, 1.0, 1.0);
-    color = mix(color2, color1, log(1.0+m));
+    //vec3 color1 = vec3(0.0, 0.0, 1.0);
+    //vec3 color2 = vec3(1.0, 1.0, 1.0);
+    //color = mix(color2, color1, log(1.0+m));
     
     // hsv attempt
     color = hsb2rgb(vec3(m, m, m));
@@ -41,18 +55,21 @@ void main (void) {
 }
 
 // return normalised number of iterations 
-float mandelbrot(vec2 posn) {
+float mandelbrot(vec2 posn, float power) {
     int maxIterations = 100;
-    float f_thresh = 2.0;
+    float magZ = 0.0;
+    float magC = 2.0;
 
     vec2 z = vec2(0.0);
     vec2 zPrime = vec2(0.0);
+    vec2 temp = vec2(0.0);
     int i = 0;
     for (i = 0; i < maxIterations; i++) {
-        if ((z.x*z.x + z.y*z.y) > f_thresh*f_thresh) {
+        magZ = length(z);
+        if (magZ >= magC) {
             break;
         } else {
-            z = vec2(z.x*z.x- z.y* z.y+posn.x, 2.0*z.x*z.y+posn.y);
+            z = cpow(z, power)+posn;
         }
     }
 
